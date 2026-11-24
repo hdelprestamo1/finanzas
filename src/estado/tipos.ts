@@ -1,4 +1,5 @@
 // Modelo de datos (§7, especificación v3). Importes y saldos siempre en céntimos (enteros).
+import { categoriasPorDefecto } from '../categorias/porDefecto'
 
 export type TipoMovimiento =
   | 'tarjeta' // "COMPRA T.C. ..."
@@ -113,7 +114,7 @@ export function estadoInicial(): EstadoApp {
     version: 1,
     ajustes: { miNombre: [], minutosBloqueo: MINUTOS_BLOQUEO_POR_DEFECTO },
     movimientos: [],
-    categorias: [],
+    categorias: categoriasPorDefecto(),
     reglas: [],
     personas: [],
     deudas: [],
