@@ -1,8 +1,16 @@
 // Iconos propios en SVG (sin librerías ni recursos externos).
 
-export type NombreIcono = 'inicio' | 'movimientos' | 'graficas' | 'deudas' | 'importar' | 'ajustes'
+export type NombreIcono =
+  | 'inicio'
+  | 'movimientos'
+  | 'graficas'
+  | 'deudas'
+  | 'importar'
+  | 'ajustes'
+  | 'candado'
 
 const TRAZOS: Record<NombreIcono, string> = {
+  candado: 'M6 11h12v10H6zM8.5 11V7.5a3.5 3.5 0 017 0V11',
   inicio: 'M3 11l9-8 9 8M5 9.5V21h5v-6h4v6h5V9.5',
   movimientos: 'M4 6h16M4 12h16M4 18h10',
   graficas: 'M4 20V10M10 20V4M16 20v-7M22 20H2',

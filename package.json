@@ -11,11 +11,14 @@
     "iconos": "node scripts/generar-iconos.mjs"
   },
   "dependencies": {
-    "preact": "^11.2.0"
+    "idb": "^8.0.4",
+    "preact": "^11.2.0",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.10.6",
     "@types/node": "^26.6.6",
+    "fake-indexeddb": "^6.2.8",
     "typescript": "^7.0.2",
     "vite": "^8.3.8",
     "vite-plugin-pwa": "^2.0.0",

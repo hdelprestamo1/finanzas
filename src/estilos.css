@@ -58,9 +58,32 @@ body {
   border-bottom: 1px solid var(--borde);
 }
 
+.cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .cabecera h1 {
   margin: 0;
   font-size: 1.35rem;
+}
+
+.boton-icono {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin: -0.5rem -0.5rem -0.5rem 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--texto-2);
+  cursor: pointer;
+}
+
+.boton-icono:hover {
+  background: var(--borde);
 }
 
 .contenido {
@@ -165,4 +188,256 @@ body {
   outline: 2px solid var(--acento);
   outline-offset: -2px;
   border-radius: 8px;
+}
+
+/* Formularios y botones */
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.formulario h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.formulario p {
+  margin: 0;
+}
+
+.formulario label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.92rem;
+}
+
+.formulario label.casilla,
+label.casilla {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 0.55rem;
+}
+
+.casilla input {
+  width: 1.15rem;
+  height: 1.15rem;
+  margin: 0.1rem 0 0;
+  flex: none;
+  accent-color: var(--acento);
+}
+
+input[type='text'],
+input[type='password'],
+select {
+  width: 100%;
+  /* 16px evita el zoom automático de Safari en iPhone al enfocar */
+  font: inherit;
+  font-size: 16px;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  background: var(--fondo);
+  color: var(--texto);
+}
+
+input:focus-visible,
+select:focus-visible,
+.boton:focus-visible,
+.enlace:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 1px;
+}
+
+.fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.fila select {
+  width: auto;
+}
+
+.tarjeta > .secundario {
+  margin: 0.25rem 0 0.75rem;
+}
+
+.ayuda {
+  color: var(--texto-2);
+  font-size: 0.8rem;
+}
+
+.error {
+  color: var(--gasto);
+}
+
+.ayuda.error {
+  color: var(--gasto);
+}
+
+.exito {
+  color: var(--ingreso);
+  margin-bottom: 0.75rem !important;
+}
+
+.aviso {
+  padding: 0.75rem;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--gasto) 45%, transparent);
+  background: color-mix(in srgb, var(--gasto) 10%, transparent);
+  font-size: 0.92rem;
+}
+
+.boton {
+  font: inherit;
+  font-weight: 600;
+  padding: 0.7rem 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--borde);
+  background: var(--superficie);
+  color: var(--texto);
+  cursor: pointer;
+}
+
+.boton.principal {
+  background: var(--acento);
+  border-color: var(--acento);
+  color: #fff;
+}
+
+.boton.peligro {
+  color: var(--gasto);
+  border-color: color-mix(in srgb, var(--gasto) 50%, transparent);
+}
+
+.boton.peligro[type='submit']:not(:disabled) {
+  background: var(--gasto);
+  border-color: var(--gasto);
+  color: #fff;
+}
+
+.boton:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.botones {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.enlace {
+  font: inherit;
+  font-size: 0.9rem;
+  border: 0;
+  background: none;
+  color: var(--acento);
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0.5rem;
+}
+
+.confirmar-borrado p {
+  margin: 0;
+  font-size: 0.92rem;
+}
+
+/* Pantalla de acceso */
+.acceso {
+  min-height: 100dvh;
+  max-width: 26rem;
+  margin: 0 auto;
+  padding: calc(env(safe-area-inset-top) + 3rem) calc(env(safe-area-inset-right) + 1.25rem)
+    calc(env(safe-area-inset-bottom) + 2rem) calc(env(safe-area-inset-left) + 1.25rem);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1.25rem;
+}
+
+.acceso > h1 {
+  margin: 0;
+  text-align: center;
+  font-size: 1.6rem;
+}
+
+.acceso > .enlace {
+  align-self: center;
+}
+
+.acceso-logo {
+  align-self: center;
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 22%;
+  background: #1f6f5c;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.32rem;
+  padding-bottom: 1.2rem;
+}
+
+.acceso-logo span {
+  width: 0.55rem;
+  border-radius: 2px;
+  background: #fff;
+}
+
+.acceso-logo span:nth-child(1) {
+  height: 0.8rem;
+}
+
+.acceso-logo span:nth-child(2) {
+  height: 1.4rem;
+}
+
+.acceso-logo span:nth-child(3) {
+  height: 2.1rem;
+}
+
+/* Etiquetas (lista de nombres) */
+.etiquetas {
+  list-style: none;
+  margin: 0 0 0.75rem;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.etiquetas li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.25rem 0.3rem 0.25rem 0.7rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--acento) 15%, transparent);
+  font-size: 0.92rem;
+}
+
+.etiquetas button {
+  border: 0;
+  background: none;
+  color: var(--texto-2);
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 0.1rem 0.35rem;
+  cursor: pointer;
+}
+
+.fila-formulario {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.fila-formulario input {
+  flex: 1;
+  min-width: 0;
 }

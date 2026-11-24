@@ -20,7 +20,7 @@ const CSP = [
   "img-src 'self' data: blob:",
   "font-src 'self'",
   "connect-src 'self'",
-  "worker-src 'self' blob:",
+  "worker-src 'self'",
   "manifest-src 'self'",
   "object-src 'none'",
   "base-uri 'none'",

@@ -1,5 +1,5 @@
 import { PantallaVacia } from './vacia'
 
 export function Importar() {
-  return <PantallaVacia fase={3} texto="Importar extractos PDF de Kutxabank y contactos .vcf." />
+  return <PantallaVacia fase={3} texto="Importar extractos Excel (.xls) de Kutxabank y contactos .vcf." />
 }
