@@ -638,3 +638,232 @@ input[type='search'] {
 .resumen {
   font-size: 0.88rem;
 }
+
+/* Filas de movimiento clicables */
+.movimientos li:has(> .fila-mov) {
+  padding: 0;
+}
+
+.fila-mov {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.6rem 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.fila-mov:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Ficha (hoja inferior en móvil, ventana centrada en escritorio) */
+.capa {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgb(0 0 0 / 0.45);
+}
+
+.hoja {
+  width: 100%;
+  max-width: 34rem;
+  max-height: 90dvh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 1rem calc(env(safe-area-inset-right) + 1rem)
+    calc(env(safe-area-inset-bottom) + 1.25rem) calc(env(safe-area-inset-left) + 1rem);
+  background: var(--superficie);
+  border-radius: 16px 16px 0 0;
+}
+
+@media (min-width: 40rem) {
+  .capa {
+    align-items: center;
+  }
+
+  .hoja {
+    border-radius: 16px;
+  }
+}
+
+.hoja-cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.hoja-cabecera h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  word-break: break-word;
+}
+
+.hoja-cabecera .boton-icono {
+  font-size: 1.5rem;
+  margin: -0.4rem -0.4rem 0 0;
+}
+
+.importe-grande {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.concepto-original {
+  margin: 0;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 0.8rem;
+  color: var(--texto-2);
+  word-break: break-all;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.92rem;
+}
+
+textarea {
+  width: 100%;
+  font: inherit;
+  font-size: 16px;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  background: var(--fondo);
+  color: var(--texto);
+  resize: vertical;
+}
+
+.pregunta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.85rem;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--acento) 45%, transparent);
+  background: color-mix(in srgb, var(--acento) 8%, transparent);
+}
+
+.pregunta p {
+  margin: 0;
+}
+
+.hoja .enlace {
+  align-self: flex-start;
+  padding: 0;
+}
+
+/* Categorías y reglas */
+.lista-categorias,
+.lista-reglas {
+  list-style: none;
+  margin: 0 0 0.75rem;
+  padding: 0;
+}
+
+.lista-categorias li {
+  border-top: 1px solid var(--borde);
+}
+
+.lista-categorias li:first-child {
+  border-top: 0;
+}
+
+.fila-categoria {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.fila-categoria .nombre {
+  flex: 1;
+}
+
+.editar-categoria {
+  padding: 0.75rem 0;
+  gap: 0.6rem;
+}
+
+.editar-categoria .botones {
+  align-items: center;
+}
+
+.editar-categoria .extra {
+  margin-right: auto;
+}
+
+input[type='color'] {
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0.2rem;
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  background: var(--fondo);
+  flex: none;
+}
+
+.enlace.peligro {
+  color: var(--gasto);
+  padding: 0;
+}
+
+.boton.peligro.relleno {
+  background: var(--gasto);
+  border-color: var(--gasto);
+  color: #fff;
+}
+
+.lista-reglas li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.3rem 0;
+  font-size: 0.9rem;
+  word-break: break-word;
+}
+
+.lista-reglas .boton-icono {
+  width: 2rem;
+  height: 2rem;
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.reglas-defecto summary {
+  cursor: pointer;
+  color: var(--acento);
+  font-size: 0.9rem;
+  padding: 0.3rem 0;
+}
+
+.reglas-defecto .lista-reglas {
+  color: var(--texto-2);
+  margin-top: 0.4rem;
+}

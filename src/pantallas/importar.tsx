@@ -1,15 +1,13 @@
-import { useState } from 'preact/hooks'
+import { useMemo, useState } from 'preact/hooks'
 import { useApp } from '../estado/contexto'
 import {
   ErrorImportacion,
-  aplicarImportacion,
   kutxabankExcel,
   preverImportacion,
   type PrevisionImportacion,
 } from '../importador'
 import { NOMBRE_TIPO, euros, eurosConSigno, fechaCorta } from '../utilidades/formato'
-import { categoriaBasica } from '../categorias/porDefecto'
-import type { TipoMovimiento } from '../estado/tipos'
+import { categoriasPropuestas, importarExtracto } from '../categorias/operaciones'
 
 type Paso =
   | { tipo: 'elegir' }
@@ -46,16 +44,13 @@ export function Importar() {
   async function confirmar(prevision: PrevisionImportacion, nombre: string) {
     setPaso({ tipo: 'guardando' })
     try {
-      await app.actualizar((estado) => {
-        // Se recalcula sobre el estado actual por si ha cambiado desde la vista previa.
-        const actual = preverImportacion(prevision.extracto, estado.movimientos)
-        const { movimientos, importacion } = aplicarImportacion(actual, estado.movimientos, {
+      await app.actualizar((estado) =>
+        importarExtracto(estado, prevision, {
           importacionId: crypto.randomUUID(),
           nombreArchivo: nombre,
           fecha: new Date().toISOString(),
-        })
-        return { ...estado, movimientos, importaciones: [...estado.importaciones, importacion] }
-      })
+        }),
+      )
       setPaso({ tipo: 'hecho', nuevos: prevision.nuevos, duplicados: prevision.duplicados })
     } catch {
       setPaso({ tipo: 'error', mensaje: 'No se han podido guardar los movimientos.' })
@@ -148,10 +143,11 @@ function VistaPrevia(props: {
   const { prevision } = props
   const { extracto } = prevision
   const noReconocidos = prevision.filas.filter((f) => !f.leido.reconocido).length
-  const categorias = useApp().estado.categorias
-  const nombreCategoria = (tipo: TipoMovimiento, importe: number) => {
-    const id = categoriaBasica(tipo, importe)
-    return categorias.find((c) => c.id === id)?.nombre ?? id
+  const { estado } = useApp()
+  const propuestas = useMemo(() => categoriasPropuestas(estado, prevision), [estado, prevision])
+  const nombreCategoria = (movimientoId: string) => {
+    const id = propuestas.get(movimientoId)
+    return estado.categorias.find((c) => c.id === id)?.nombre ?? '—'
   }
 
   return (
@@ -211,7 +207,7 @@ function VistaPrevia(props: {
                 <span class="mov-concepto">{f.leido.concepto}</span>
                 <span class="mov-detalle">
                   {fechaCorta(f.leido.fecha)} · {NOMBRE_TIPO[f.leido.tipo]} ·{' '}
-                  {nombreCategoria(f.leido.tipo, f.leido.importe)}
+                  {nombreCategoria(f.id)}
                   {!f.leido.reconocido && <span class="marca">tipo no reconocido</span>}
                   {f.duplicado && <span class="marca neutra">ya importado</span>}
                 </span>

@@ -3,6 +3,7 @@ import { useApp } from '../estado/contexto'
 import type { Movimiento, TipoMovimiento } from '../estado/tipos'
 import { NOMBRE_TIPO, euros, eurosConSigno, fechaLarga, nombreMes } from '../utilidades/formato'
 import { normalizar } from '../utilidades/texto'
+import { DetalleMovimiento } from '../componentes/detalle-movimiento'
 
 type Sentido = 'todos' | 'ingresos' | 'gastos'
 
@@ -12,6 +13,8 @@ export function Movimientos() {
   const [mes, setMes] = useState('todos')
   const [tipo, setTipo] = useState<'todos' | TipoMovimiento>('todos')
   const [sentido, setSentido] = useState<Sentido>('todos')
+  const [categoria, setCategoria] = useState('todas')
+  const [seleccionado, setSeleccionado] = useState<string | null>(null)
 
   const categorias = useMemo(
     () => new Map(estado.categorias.map((c) => [c.id, c])),
@@ -29,12 +32,13 @@ export function Movimientos() {
       (m) =>
         (mes === 'todos' || m.fecha.startsWith(mes)) &&
         (tipo === 'todos' || m.tipo === tipo) &&
+        (categoria === 'todas' || m.categoriaId === categoria) &&
         (sentido === 'todos' || (sentido === 'ingresos' ? m.importe > 0 : m.importe < 0)) &&
         (!texto ||
           normalizar(m.concepto).includes(texto) ||
           normalizar(m.nota ?? '').includes(texto)),
     )
-  }, [estado.movimientos, busqueda, mes, tipo, sentido])
+  }, [estado.movimientos, busqueda, mes, tipo, sentido, categoria])
 
   // Agrupados por día, del más reciente al más antiguo (dentro del día, el último primero).
   const porDia = useMemo(() => {
@@ -103,6 +107,20 @@ export function Movimientos() {
             <option value="ingresos">Solo ingresos</option>
             <option value="gastos">Solo gastos</option>
           </select>
+          <select
+            value={categoria}
+            onChange={(e) => setCategoria(e.currentTarget.value)}
+            aria-label="Categoría"
+          >
+            <option value="todas">Todas las categorías</option>
+            {[...estado.categorias]
+              .sort((a, b) => a.orden - b.orden)
+              .map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.nombre}
+                </option>
+              ))}
+          </select>
         </div>
         <dl class="datos resumen">
           <dt>{filtrados.length} movimientos</dt>
@@ -123,6 +141,7 @@ export function Movimientos() {
           <ul class="movimientos tarjeta">
             {lista.map((m) => (
               <li key={m.id}>
+                <button type="button" class="fila-mov" onClick={() => setSeleccionado(m.id)}>
                 <span
                   class="punto"
                   style={{ background: categorias.get(m.categoriaId)?.color ?? 'var(--texto-2)' }}
@@ -132,6 +151,7 @@ export function Movimientos() {
                   <span class="mov-concepto">{m.comercio ?? m.textoLibre ?? m.concepto}</span>
                   <span class="mov-detalle">
                     {NOMBRE_TIPO[m.tipo]} · {categorias.get(m.categoriaId)?.nombre ?? '—'}
+                    {m.nota && <> · {m.nota}</>}
                   </span>
                 </div>
                 <div class="mov-cifras">
@@ -140,11 +160,15 @@ export function Movimientos() {
                   </span>
                   <span class="mov-saldo">{euros(m.saldo)}</span>
                 </div>
+                </button>
               </li>
             ))}
           </ul>
         </section>
       ))}
+      {seleccionado && (
+        <DetalleMovimiento id={seleccionado} alCerrar={() => setSeleccionado(null)} />
+      )}
     </>
   )
 }

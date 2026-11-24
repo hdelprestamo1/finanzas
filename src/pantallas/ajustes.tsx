@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'preact/hooks'
 import { useApp } from '../estado/contexto'
 import { BorrarTodo } from '../componentes/borrar-todo'
+import { Categorias, Reglas } from '../componentes/categorias-ajustes'
 import { ContrasenaIncorrecta, LONGITUD_MINIMA_CONTRASENA } from '../seguridad/boveda'
 import { normalizar } from '../utilidades/texto'
 
@@ -12,6 +13,10 @@ export function Ajustes() {
   return (
     <>
       <MiNombre />
+
+      <Categorias />
+
+      <Reglas />
 
       <section class="tarjeta">
         <h2>Seguridad</h2>
