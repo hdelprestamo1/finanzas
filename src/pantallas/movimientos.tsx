@@ -143,10 +143,12 @@ export function Movimientos() {
               <li key={m.id}>
                 <button type="button" class="fila-mov" onClick={() => setSeleccionado(m.id)}>
                 <span
-                  class="punto"
-                  style={{ background: categorias.get(m.categoriaId)?.color ?? 'var(--texto-2)' }}
+                  class="avatar"
+                  style={{ '--color-avatar': categorias.get(m.categoriaId)?.color ?? 'var(--texto-2)' }}
                   aria-hidden="true"
-                />
+                >
+                  {(categorias.get(m.categoriaId)?.nombre ?? '?').charAt(0).toUpperCase()}
+                </span>
                 <div class="mov-texto">
                   <span class="mov-concepto">{m.comercio ?? m.textoLibre ?? m.concepto}</span>
                   <span class="mov-detalle">

@@ -1,11 +1,18 @@
 // Genera los iconos de la app (PNG) sin dependencias: dibuja tres barras
-// crecientes sobre fondo verde y codifica el PNG con zlib de Node.
+// crecientes sobre fondo azul y codifica el PNG con zlib de Node.
 // Uso: npm run iconos
 import { deflateSync } from 'node:zlib'
 import { writeFileSync, mkdirSync } from 'node:fs'
 
-const FONDO = [0x1f, 0x6f, 0x5c]
+// Fondo en degradado diagonal azul (arriba-izquierda claro → abajo-derecha oscuro).
+const FONDO_INICIO = [0x4f, 0x8f, 0xf7]
+const FONDO_FIN = [0x1d, 0x4e, 0xd8]
 const BARRA = [0xff, 0xff, 0xff]
+
+function fondo(u, v, c) {
+  const t = Math.min(1, Math.max(0, (v * 0.94 + u * 0.34) / 1.28))
+  return FONDO_INICIO[c] * (1 - t) + FONDO_FIN[c] * t
+}
 
 // Barras en coordenadas relativas (0..1). Todo dentro de la "zona segura"
 // central del 80 % para que el icono maskable no se recorte.
@@ -40,7 +47,9 @@ function dibujar(tam) {
           if (dentroDeBarra((x + (sx + 0.5) / SS) / tam, (y + (sy + 0.5) / SS) / tam)) dentro++
       const a = dentro / (SS * SS)
       for (let c = 0; c < 3; c++)
-        filas[fila + 1 + x * 3 + c] = Math.round(FONDO[c] * (1 - a) + BARRA[c] * a)
+        filas[fila + 1 + x * 3 + c] = Math.round(
+          fondo((x + 0.5) / tam, (y + 0.5) / tam, c) * (1 - a) + BARRA[c] * a,
+        )
     }
   }
   return png(tam, tam, filas)

@@ -71,8 +71,8 @@ export default defineConfig({
         scope: BASE,
         display: 'standalone',
         orientation: 'portrait',
-        background_color: '#1f6f5c',
-        theme_color: '#1f6f5c',
+        background_color: '#000000',
+        theme_color: '#000000',
         icons: [
           { src: 'icono-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'icono-512.png', sizes: '512x512', type: 'image/png' },

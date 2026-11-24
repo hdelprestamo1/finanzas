@@ -6,11 +6,12 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
-    "preview": "vite preview",
+    "preview": "vite preview --port 4173 --strictPort",
     "test": "vitest run --passWithNoTests",
     "iconos": "node scripts/generar-iconos.mjs"
   },
   "dependencies": {
+    "chart.js": "^4.6.2",
     "idb": "^8.0.4",
     "preact": "^11.2.0",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
