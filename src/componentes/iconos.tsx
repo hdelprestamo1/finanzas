@@ -1,0 +1,31 @@
+// Iconos propios en SVG (sin librerías ni recursos externos).
+
+export type NombreIcono = 'inicio' | 'movimientos' | 'graficas' | 'deudas' | 'importar' | 'ajustes'
+
+const TRAZOS: Record<NombreIcono, string> = {
+  inicio: 'M3 11l9-8 9 8M5 9.5V21h5v-6h4v6h5V9.5',
+  movimientos: 'M4 6h16M4 12h16M4 18h10',
+  graficas: 'M4 20V10M10 20V4M16 20v-7M22 20H2',
+  deudas: 'M7 7h13l-3-3M17 17H4l3 3',
+  importar: 'M12 3v12m0 0l-4-4m4 4l4-4M4 17v3h16v-3',
+  ajustes:
+    'M12 15a3 3 0 100-6 3 3 0 000 6zM19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z',
+}
+
+export function Icono({ nombre }: { nombre: NombreIcono }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="24"
+      height="24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path d={TRAZOS[nombre]} />
+    </svg>
+  )
+}
