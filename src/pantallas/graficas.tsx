@@ -1,18 +1,18 @@
-import { useMemo, useState } from 'preact/hooks'
-import type { ChartConfiguration, Plugin, ScriptableContext, TooltipItem } from 'chart.js'
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks'
+import type { Chart as TipoChart, ChartConfiguration, Plugin, ScriptableContext, TooltipItem } from 'chart.js'
 import { useApp } from '../estado/contexto'
 import type { Categoria } from '../estado/tipos'
 import { Grafica, type Colores } from '../componentes/grafica'
 import {
   anios,
   mesPorDefecto,
-  mesesHasta,
+  mesesConDatos,
   resumenPeriodo,
   serieMensual,
-  serieSaldo,
+  serieSaldoDiaria,
   type TotalCategoria,
 } from '../estadisticas/resumen'
-import { euros, fechaCorta, nombreMes } from '../utilidades/formato'
+import { euros, eurosConSigno, fechaCorta, fechaLarga, nombreMes } from '../utilidades/formato'
 
 const MAX_SEGMENTOS = 6 // el resto se agrupa en "Resto" (nunca más de 7 colores)
 const ID_RESTO = '__resto'
@@ -134,79 +134,139 @@ export function Graficas() {
   )
 }
 
-// --- Barras: ingresos vs gastos, últimos 12 meses ----------------------------------
+// --- Barras: ingresos (arriba) y gastos (abajo) por mes ------------------------------
 
 function IngresosGastos() {
   const { estado } = useApp()
   const hoy = new Date().toISOString().slice(0, 10)
   const serie = useMemo(() => {
-    const meses = mesesHasta(mesPorDefecto(estado.movimientos, hoy), 12)
+    const meses = mesesConDatos(estado.movimientos, mesPorDefecto(estado.movimientos, hoy), 12)
     return serieMensual(estado.movimientos, estado.categorias, meses)
   }, [estado.movimientos, estado.categorias, hoy])
 
-  const crear = (colores: Colores): ChartConfiguration<'bar'> => ({
-    type: 'bar',
-    data: {
-      labels: serie.map((s) => mesCorto(s.mes)),
-      datasets: [
-        { label: 'Ingresos', data: serie.map((s) => s.ingresos), color: colores.ingreso },
-        { label: 'Gastos', data: serie.map((s) => s.gastos), color: colores.gasto },
-      ].map(({ color, ...d }) => ({
-        ...d,
-        backgroundColor: degradado<'bar'>(color, 1, 0.35),
-        hoverBackgroundColor: color,
-        borderRadius: 6,
-        borderSkipped: 'bottom' as const,
-        maxBarThickness: 14,
-        categoryPercentage: 0.72,
-        barPercentage: 0.85,
-      })),
-    },
-    options: {
-      maintainAspectRatio: false,
-      interaction: { mode: 'index', intersect: false },
-      scales: escalas(colores),
-      plugins: {
-        legend: { display: false }, // leyenda en HTML, encima de la gráfica
-        tooltip: {
-          ...tooltip(colores),
-          callbacks: {
-            title: (items: TooltipItem<'bar'>[]) => nombreMes(serie[items[0]!.dataIndex]!.mes),
-            label: (i: TooltipItem<'bar'>) => ` ${i.dataset.label}: ${euros(i.parsed.y ?? 0)}`,
-            footer: (items: TooltipItem<'bar'>[]) =>
-              `Balance: ${euros(serie[items[0]!.dataIndex]!.balance)}`,
+  const totalIngresos = serie.reduce((s, x) => s + x.ingresos, 0)
+  const totalGastos = serie.reduce((s, x) => s + x.gastos, 0)
+  const meses = serie.length
+
+  const crear = (colores: Colores) =>
+    ({
+      type: 'bar',
+      data: {
+        labels: serie.map((s) => mesCorto(s.mes)),
+        datasets: [
+          {
+            label: 'Ingresos',
+            data: serie.map((s) => s.ingresos),
+            backgroundColor: colores.ingreso,
+            hoverBackgroundColor: colores.ingreso,
+            stack: 'flujo',
+            order: 2,
+          },
+          {
+            label: 'Gastos',
+            data: serie.map((s) => -s.gastos),
+            backgroundColor: colores.gasto,
+            hoverBackgroundColor: colores.gasto,
+            stack: 'flujo',
+            order: 2,
+          },
+          {
+            type: 'line',
+            label: 'Balance',
+            data: serie.map((s) => s.balance),
+            showLine: false,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            pointBackgroundColor: colores.texto,
+            pointBorderColor: colores.superficie,
+            pointBorderWidth: 2,
+            order: 1,
+          },
+        ].map((d) =>
+          d.type === 'line'
+            ? d
+            : {
+                ...d,
+                borderRadius: 8,
+                borderSkipped: 'start',
+                barPercentage: 0.7,
+                categoryPercentage: 0.8,
+                maxBarThickness: 40,
+              },
+        ),
+      },
+      options: {
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        scales: {
+          x: {
+            stacked: true,
+            grid: { display: false },
+            border: { display: false },
+            ticks: { color: colores.ejeTexto, maxRotation: 0, font: { size: 11 } },
+          },
+          y: {
+            stacked: true,
+            border: { display: false },
+            grid: {
+              // La línea del cero, más marcada: separa ingresos (arriba) de gastos (abajo).
+              color: (c: { tick?: { value: number } }) => (c.tick?.value === 0 ? colores.eje : colores.rejilla),
+              lineWidth: (c: { tick?: { value: number } }) => (c.tick?.value === 0 ? 1.5 : 1),
+            },
+            ticks: {
+              color: colores.ejeTexto,
+              callback: (v: string | number) => eje(Math.abs(Number(v))),
+              maxTicksLimit: 6,
+              padding: 8,
+              font: { size: 11 },
+            },
+          },
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            ...tooltip(colores),
+            callbacks: {
+              title: (items: TooltipItem<'bar'>[]) => nombreMes(serie[items[0]!.dataIndex]!.mes),
+              label: (i: TooltipItem<'bar'>) =>
+                ` ${i.dataset.label}: ${i.dataset.label === 'Balance' ? eurosConSigno(i.parsed.y ?? 0) : euros(Math.abs(i.parsed.y ?? 0))}`,
+            },
           },
         },
       },
-    },
-  })
+    }) as unknown as ChartConfiguration<'bar'>
 
   return (
     <section class="tarjeta">
-      <div class="cabecera-grafica">
+      <h2>Ingresos y gastos</h2>
+      <p class="secundario">
+        {meses === 1 ? nombreMes(serie[0]!.mes) : `Últimos ${meses} meses`}
+      </p>
+      <div class="resumen-flujo">
         <div>
-          <h2>Ingresos y gastos</h2>
-          <div class="leyenda-linea">
-            <span>
-              <i style={{ '--color-leyenda': 'var(--serie-ingreso)' }} />
-              Ingresos
-            </span>
-            <span>
-              <i style={{ '--color-leyenda': 'var(--serie-gasto)' }} />
-              Gastos
-            </span>
-          </div>
+          <span class="leyenda-punto" style={{ '--color-leyenda': 'var(--serie-ingreso)' }}>
+            Ingresos
+          </span>
+          <strong>{euros(totalIngresos)}</strong>
         </div>
-        <div class="cifra-grafica">
-          <strong>{euros(serie.reduce((s, x) => s + x.balance, 0))}</strong>
-          <span>balance 12 meses</span>
+        <div>
+          <span class="leyenda-punto" style={{ '--color-leyenda': 'var(--serie-gasto)' }}>
+            Gastos
+          </span>
+          <strong>{euros(totalGastos)}</strong>
+        </div>
+        <div>
+          <span class="leyenda-punto leyenda-balance">Balance</span>
+          <strong class={totalIngresos - totalGastos < 0 ? 'gasto' : 'ingreso'}>
+            {eurosConSigno(totalIngresos - totalGastos)}
+          </strong>
         </div>
       </div>
       <Grafica
         crear={crear}
         clave={JSON.stringify(serie)}
-        alto={220}
-        descripcion="Gráfica de barras con los ingresos y gastos de los últimos 12 meses"
+        alto={240}
+        descripcion={`Gráfica de barras por mes: ingresos hacia arriba y gastos hacia abajo. Total ingresos ${euros(totalIngresos)}, gastos ${euros(totalGastos)}`}
       />
     </section>
   )
@@ -344,11 +404,86 @@ function GastoPorCategoria() {
   )
 }
 
-// --- Línea: evolución del saldo -----------------------------------------------------------
+// --- Línea: evolución del saldo (desplazable) -----------------------------------------------
+
+const RANGOS = [
+  { id: '1m', texto: '1M', dias: 30 },
+  { id: '3m', texto: '3M', dias: 91 },
+  { id: '6m', texto: '6M', dias: 182 },
+  { id: '1a', texto: '1A', dias: 365 },
+  { id: 'todo', texto: 'Todo', dias: Infinity },
+] as const
+type IdRango = (typeof RANGOS)[number]['id']
 
 function EvolucionSaldo() {
   const { estado } = useApp()
-  const serie = useMemo(() => serieSaldo(estado.movimientos), [estado.movimientos])
+  const serie = useMemo(() => serieSaldoDiaria(estado.movimientos), [estado.movimientos])
+  const total = serie.length
+  const [rango, setRango] = useState<IdRango>('3m')
+  const dias = Math.min(total, RANGOS.find((r) => r.id === rango)!.dias)
+  const [fin, setFin] = useState(total - 1) // índice del último día visible
+  const finVisible = Math.min(Math.max(fin, dias - 1), total - 1)
+  const inicio = finVisible - dias + 1
+  const grafica = useRef<TipoChart<'line'> | null>(null)
+  const zona = useRef<HTMLDivElement>(null)
+
+  // Al cambiar los datos (nueva importación), volver al final.
+  useEffect(() => setFin(total - 1), [total])
+
+  // Mueve la ventana visible sin redibujar la gráfica entera.
+  const aplicarVentana = (g: TipoChart<'line'> | null) => {
+    if (!g || total === 0) return
+    const visibles = serie.slice(inicio, finVisible + 1).map((p) => p.saldo)
+    const min = Math.min(...visibles)
+    const max = Math.max(...visibles)
+    const margen = Math.max((max - min) * 0.12, 500)
+    const x = g.options.scales!.x!
+    const y = g.options.scales!.y!
+    x.min = inicio
+    x.max = finVisible
+    y.min = Math.floor((min - margen) / 1000) * 1000
+    y.max = Math.ceil((max + margen) / 1000) * 1000
+    g.update('none')
+  }
+  useEffect(() => aplicarVentana(grafica.current), [inicio, finVisible, total])
+
+  // Arrastrar (dedo o ratón) y rueda/trackpad horizontal para desplazarse.
+  useEffect(() => {
+    const el = zona.current
+    if (!el) return
+    let arrastre: { x: number; fin: number } | null = null
+    const puntosPorPixel = () => dias / Math.max(1, el.clientWidth - 50)
+    const mover = (nuevoFin: number) => setFin(Math.min(total - 1, Math.max(dias - 1, Math.round(nuevoFin))))
+    const abajo = (e: PointerEvent) => {
+      arrastre = { x: e.clientX, fin: finVisible }
+      el.setPointerCapture(e.pointerId)
+    }
+    const movimiento = (e: PointerEvent) => {
+      if (arrastre) mover(arrastre.fin - (e.clientX - arrastre.x) * puntosPorPixel())
+    }
+    const arriba = () => {
+      arrastre = null
+    }
+    const rueda = (e: WheelEvent) => {
+      if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return // scroll vertical: la página
+      e.preventDefault()
+      mover(finVisible + e.deltaX * puntosPorPixel())
+    }
+    el.addEventListener('pointerdown', abajo)
+    el.addEventListener('pointermove', movimiento)
+    el.addEventListener('pointerup', arriba)
+    el.addEventListener('pointercancel', arriba)
+    el.addEventListener('wheel', rueda, { passive: false })
+    return () => {
+      el.removeEventListener('pointerdown', abajo)
+      el.removeEventListener('pointermove', movimiento)
+      el.removeEventListener('pointerup', arriba)
+      el.removeEventListener('pointercancel', arriba)
+      el.removeEventListener('wheel', rueda)
+    }
+  }, [dias, total, finVisible])
+
+  if (total === 0) return null
 
   const crear = (colores: Colores): ChartConfiguration<'line'> => ({
     type: 'line',
@@ -368,7 +503,7 @@ function EvolucionSaldo() {
           pointHoverBorderWidth: 2,
           pointHoverBackgroundColor: colores.saldo,
           pointHoverBorderColor: '#000',
-          cubicInterpolationMode: 'monotone',
+          stepped: 'before', // el saldo se mantiene hasta el siguiente movimiento
         },
       ],
     },
@@ -376,13 +511,21 @@ function EvolucionSaldo() {
     options: {
       maintainAspectRatio: false,
       interaction: { mode: 'index', intersect: false },
-      scales: escalas(colores),
+      scales: {
+        ...escalas(colores),
+        x: {
+          ...escalas(colores).x,
+          min: inicio,
+          max: finVisible,
+          ticks: { ...escalas(colores).x.ticks, maxTicksLimit: 6, autoSkip: true },
+        },
+      },
       plugins: {
         legend: { display: false }, // una sola serie: el título la nombra
         tooltip: {
           ...tooltip(colores),
           callbacks: {
-            title: (items: TooltipItem<'line'>[]) => fechaCorta(serie[items[0]!.dataIndex]!.fecha),
+            title: (items: TooltipItem<'line'>[]) => fechaLarga(serie[items[0]!.dataIndex]!.fecha),
             label: (i: TooltipItem<'line'>) => ` Saldo: ${euros(i.parsed.y ?? 0)}`,
           },
         },
@@ -390,21 +533,82 @@ function EvolucionSaldo() {
     },
   })
 
-  const primero = serie[0]!
-  const ultimo = serie[serie.length - 1]!
+  const desde = serie[inicio]!
+  const hasta = serie[finVisible]!
+  const puedeMoverse = dias < total
+
   return (
     <section class="tarjeta">
-      <h2>Evolución del saldo</h2>
-      <p class="secundario">
-        {fechaCorta(primero.fecha)} – {fechaCorta(ultimo.fecha)}: de {euros(primero.saldo)} a{' '}
-        {euros(ultimo.saldo)}
-      </p>
-      <Grafica
-        crear={crear}
-        clave={JSON.stringify(serie)}
-        alto={200}
-        descripcion={`Gráfica de línea del saldo, de ${euros(primero.saldo)} a ${euros(ultimo.saldo)}`}
-      />
+      <div class="cabecera-grafica">
+        <div>
+          <h2>Evolución del saldo</h2>
+          <p class="secundario">
+            {fechaCorta(desde.fecha)} – {fechaCorta(hasta.fecha)}
+          </p>
+        </div>
+        <div class="cifra-grafica">
+          <strong>{euros(hasta.saldo)}</strong>
+          <span class={hasta.saldo - desde.saldo < 0 ? 'gasto' : 'ingreso'}>
+            {eurosConSigno(hasta.saldo - desde.saldo)}
+          </span>
+        </div>
+      </div>
+      <div class="segmentado rangos" role="group" aria-label="Periodo visible">
+        {RANGOS.map((r) => (
+          <button
+            key={r.id}
+            type="button"
+            aria-pressed={rango === r.id}
+            onClick={() => {
+              setRango(r.id)
+              setFin(total - 1)
+            }}
+          >
+            {r.texto}
+          </button>
+        ))}
+      </div>
+      <div ref={zona} class={puedeMoverse ? 'zona-desplazable' : undefined}>
+        <Grafica
+          crear={crear}
+          clave={JSON.stringify(serie)}
+          alto={210}
+          descripcion={`Gráfica de línea del saldo del ${fechaCorta(desde.fecha)} al ${fechaCorta(hasta.fecha)}: de ${euros(desde.saldo)} a ${euros(hasta.saldo)}`}
+          alCrear={(g) => {
+            grafica.current = g
+            aplicarVentana(g)
+          }}
+        />
+      </div>
+      {puedeMoverse && (
+        <div class="navegacion-saldo">
+          <button
+            type="button"
+            class="boton-icono"
+            aria-label="Antes"
+            disabled={inicio === 0}
+            onClick={() => setFin(Math.max(dias - 1, finVisible - Math.ceil(dias / 2)))}
+          >
+            ‹
+          </button>
+          <div class="pista-saldo" aria-hidden="true">
+            <div
+              class="pulgar-saldo"
+              style={{ left: `${(inicio / total) * 100}%`, width: `${(dias / total) * 100}%` }}
+            />
+          </div>
+          <button
+            type="button"
+            class="boton-icono"
+            aria-label="Después"
+            disabled={finVisible === total - 1}
+            onClick={() => setFin(Math.min(total - 1, finVisible + Math.ceil(dias / 2)))}
+          >
+            ›
+          </button>
+        </div>
+      )}
+      {puedeMoverse && <p class="ayuda centrada">Arrastra la gráfica para ver otras fechas</p>}
     </section>
   )
 }

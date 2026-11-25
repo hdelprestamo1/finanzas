@@ -110,6 +110,8 @@ export interface EstadoApp {
    * o descartados de «Bizum enviados sin asignar»). Opcional: no existía antes de la fase 6.
    */
   descartados?: string[]
+  /** Puestas al día ya aplicadas a estos datos (ver estado/migraciones.ts). */
+  migraciones?: string[]
 }
 
 export const MINUTOS_BLOQUEO_POR_DEFECTO = 5
@@ -125,5 +127,6 @@ export function estadoInicial(): EstadoApp {
     deudas: [],
     pagos: [],
     importaciones: [],
+    migraciones: ['categoria-deporte'], // ya nace con las categorías actuales
   }
 }

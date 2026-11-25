@@ -39,9 +39,9 @@ describe('resumenPeriodo', () => {
 
   it('una compra devuelta no infla el gasto de su categoría', () => {
     const r = resumenPeriodo(estado.movimientos, estado.categorias, '2026-03')
-    // Transporte: movilidad 0,75 + 3 trenes de 3,10 − devolución 3,10.
+    // Transporte: movilidad 0,75 + 3 trenes de 3,10 − devolución 3,10 + taxi 8,20.
     const transporte = r.gastosPorCategoria.find((c) => c.categoriaId === 'transporte')!
-    expect(transporte.importe).toBe(75 + 310 * 3 - 310)
+    expect(transporte.importe).toBe(75 + 310 * 3 - 310 + 820)
     // La devolución no aparece como ingreso.
     expect(r.ingresosPorCategoria.some((c) => c.categoriaId === 'devoluciones')).toBe(false)
   })

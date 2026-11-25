@@ -1,4 +1,4 @@
-// Categorías por defecto (§9.1). Las reglas por palabra clave llegan en la fase 4.
+// Categorías por defecto (§9.1, más «Deporte» para gimnasios).
 import type { Categoria, TipoMovimiento } from '../estado/tipos'
 
 export const CAT = {
@@ -11,6 +11,7 @@ export const CAT = {
   suscripciones: 'suscripciones',
   ropa: 'ropa',
   salud: 'salud',
+  deporte: 'deporte',
   hogar: 'hogar',
   educacion: 'educacion',
   bizumEnviado: 'bizum-enviado',
@@ -37,6 +38,7 @@ export function categoriasPorDefecto(): Categoria[] {
     [CAT.suscripciones, 'Suscripciones', G, '#d14f7a'],
     [CAT.ropa, 'Ropa', G, '#c9a227'],
     [CAT.salud, 'Salud', G, '#d64545'],
+    [CAT.deporte, 'Deporte', G, '#84cc16'],
     [CAT.hogar, 'Hogar', G, '#6b8e23'],
     [CAT.educacion, 'Educación', G, '#4b5bd6'],
     [CAT.bizumEnviado, 'Bizum enviado', G, '#0f8b8d'],

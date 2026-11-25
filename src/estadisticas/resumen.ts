@@ -122,3 +122,31 @@ export function saldoActual(movimientos: readonly Movimiento[]): number | null {
 export function anios(movimientos: readonly Movimiento[]): string[] {
   return [...new Set(movimientos.map((m) => m.fecha.slice(0, 4)))].sort().reverse()
 }
+
+/**
+ * Saldo de CADA día entre el primer y el último movimiento (los días sin movimientos
+ * repiten el saldo anterior). Así el eje del tiempo es uniforme: 30 puntos = 30 días.
+ */
+export function serieSaldoDiaria(movimientos: readonly Movimiento[]): { fecha: string; saldo: number }[] {
+  const porDia = serieSaldo(movimientos)
+  if (porDia.length === 0) return []
+  const mapa = new Map(porDia.map((p) => [p.fecha, p.saldo]))
+  const resultado: { fecha: string; saldo: number }[] = []
+  const [a, m, d] = porDia[0]!.fecha.split('-').map(Number) as [number, number, number]
+  const fin = porDia[porDia.length - 1]!.fecha
+  let saldo = porDia[0]!.saldo
+  for (let i = 0; ; i++) {
+    const fecha = new Date(Date.UTC(a, m - 1, d + i)).toISOString().slice(0, 10)
+    saldo = mapa.get(fecha) ?? saldo
+    resultado.push({ fecha, saldo })
+    if (fecha >= fin) break
+  }
+  return resultado
+}
+
+/** Meses con datos hasta `ultimo` (incluido), como mucho los `n` últimos. */
+export function mesesConDatos(movimientos: readonly Movimiento[], ultimo: string, n: number): string[] {
+  if (movimientos.length === 0) return [ultimo]
+  const primero = mesDe(movimientos[0]!.fecha)
+  return mesesHasta(ultimo, n).filter((mes) => mes >= primero)
+}

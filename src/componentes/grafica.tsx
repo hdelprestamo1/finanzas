@@ -55,12 +55,16 @@ export function Grafica<T extends ChartType>(props: {
   clave: string
   alto: number
   descripcion: string
+  /** Se llama con la gráfica recién creada (y con null al destruirla). */
+  alCrear?: (grafica: TipoChart<T> | null) => void
 }) {
   const lienzo = useRef<HTMLCanvasElement>(null)
   const grafica = useRef<TipoChart<T> | null>(null)
   const tema = useTema()
   const crear = useRef(props.crear)
   crear.current = props.crear
+  const alCrear = useRef(props.alCrear)
+  alCrear.current = props.alCrear
 
   useEffect(() => {
     let cancelado = false
@@ -68,11 +72,13 @@ export function Grafica<T extends ChartType>(props: {
       if (cancelado || !lienzo.current) return
       grafica.current?.destroy()
       grafica.current = new Chart(lienzo.current, crear.current(leerColores()))
+      alCrear.current?.(grafica.current)
     })
     return () => {
       cancelado = true
       grafica.current?.destroy()
       grafica.current = null
+      alCrear.current?.(null)
     }
   }, [props.clave, tema])
 

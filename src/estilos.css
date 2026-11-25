@@ -1641,3 +1641,132 @@ input[type='date']::-webkit-calendar-picker-indicator {
   display: block;
   padding: 0 0 0.8rem;
 }
+
+/* Gráfica de ingresos y gastos */
+.resumen-flujo {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.resumen-flujo > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.6rem 0.7rem;
+  border-radius: var(--radio-control);
+  background: var(--superficie-2);
+  min-width: 0;
+}
+
+.resumen-flujo strong {
+  font-size: 0.98rem;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.leyenda-punto {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  color: var(--texto-2);
+}
+
+.leyenda-punto::before {
+  content: '';
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 3px;
+  background: var(--color-leyenda, var(--texto));
+}
+
+.leyenda-balance::before {
+  border-radius: 999px;
+  background: var(--texto);
+  box-shadow: 0 0 0 2px var(--superficie-2);
+}
+
+/* Gráfica del saldo desplazable */
+.rangos {
+  margin-top: 0.75rem;
+}
+
+.rangos button {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.82rem;
+}
+
+.zona-desplazable {
+  touch-action: pan-y; /* el scroll vertical sigue siendo de la página */
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.zona-desplazable:active {
+  cursor: grabbing;
+}
+
+.navegacion-saldo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+}
+
+.navegacion-saldo .boton-icono {
+  margin: 0;
+  width: 2rem;
+  height: 2rem;
+  font-size: 1.3rem;
+}
+
+.pista-saldo {
+  position: relative;
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--superficie-3);
+}
+
+.pulgar-saldo {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  min-width: 8px;
+  border-radius: 999px;
+  background: var(--acento);
+}
+
+.ayuda.centrada {
+  display: block;
+  text-align: center;
+  margin-top: 0.25rem;
+}
+
+.cifra-grafica span.ingreso,
+.cifra-grafica span.gasto {
+  font-weight: 600;
+}
+
+.cifra-grafica span.ingreso {
+  color: var(--ingreso);
+}
+
+.cifra-grafica span.gasto {
+  color: var(--gasto);
+}
+
+@media (max-width: 26rem) {
+  .resumen-flujo strong {
+    font-size: 0.86rem;
+  }
+
+  .resumen-flujo > div {
+    padding: 0.55rem 0.5rem;
+  }
+}

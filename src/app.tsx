@@ -11,7 +11,7 @@ import { Icono, type NombreIcono } from './componentes/iconos'
 import { Contexto, useApp, type ContextoApp } from './estado/contexto'
 import type { EstadoApp } from './estado/tipos'
 import * as boveda from './seguridad/boveda'
-import { ordenarPorCadena } from './importador/orden'
+import { actualizarDatos } from './estado/migraciones'
 import { useBloqueoAutomatico } from './seguridad/bloqueo-automatico'
 
 interface Pestana {
@@ -56,11 +56,9 @@ export function App() {
   }, [])
 
   const abrir = useCallback((nuevaSesion: boveda.Sesion, leido: EstadoApp) => {
-    // Reparación: datos importados con versiones anteriores pueden tener un día
-    // desordenado; se ordena por la cadena de saldos y se guarda (solo cambia el orden).
-    const ordenados = ordenarPorCadena(leido.movimientos)
-    const cambia = ordenados.some((m, i) => m !== leido.movimientos[i])
-    const nuevoEstado = cambia ? { ...leido, movimientos: ordenados } : leido
+    // Puesta al día de datos de versiones anteriores: categorías nuevas, orden por la
+    // cadena de saldos y reglas por defecto actualizadas. Solo se guarda si cambia algo.
+    const { estado: nuevoEstado, cambiado: cambia } = actualizarDatos(leido)
     sesion.current = nuevaSesion
     estado.current = nuevoEstado
     setFase({ tipo: 'abierta', estado: nuevoEstado })

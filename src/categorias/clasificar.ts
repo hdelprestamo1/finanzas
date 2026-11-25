@@ -84,7 +84,18 @@ function calcular(
   }
   if (m.tipo === 'bizum' || m.tipo === 'transferencia') return categoriaBasica(m.tipo, m.importe)
 
-  const porDefecto = defecto.find((r) => aplica(r, m))
+  // Entre las reglas por defecto que casan, gana la más específica (más palabras):
+  // «UBER EATS» (Comida fuera) antes que «UBER» (Transporte). A igualdad, la primera.
+  let porDefecto: ReglaCategoria | undefined
+  let mejor = 0
+  for (const r of defecto) {
+    if (!aplica(r, m)) continue
+    const n = palabras(r.contiene).length
+    if (n > mejor) {
+      mejor = n
+      porDefecto = r
+    }
+  }
   if (porDefecto) return porDefecto.categoriaId
 
   return categoriaBasica(m.tipo, m.importe)

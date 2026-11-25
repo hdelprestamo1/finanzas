@@ -1,21 +1,107 @@
 // Reglas iniciales por palabra clave sobre el comercio (§9.2). Ampliar aquí.
-// Se comparan por PALABRAS COMPLETAS: 'DIA' no casa con 'DIAMANTE', ni 'BP' con 'BPX'.
+//
+// - Se comparan por PALABRAS COMPLETAS: 'DIA' no casa con 'DIAMANTE', ni 'BP' con 'BPX'.
+// - Si casan varias, gana la más específica (la de más palabras): «UBER EATS» va a
+//   Comida fuera aunque «UBER» esté en Transporte.
+// - Pensadas para Madrid y para un estudiante. Se evitan palabras demasiado genéricas
+//   («NORMAL», «MAX», «O2»...) que confundirían comercios distintos.
 import { CAT } from './porDefecto'
 
 export const PALABRAS_POR_CATEGORIA: Record<string, string[]> = {
   [CAT.supermercado]: [
-    'MERCADONA', 'EROSKI', 'CARREFOUR', 'LIDL', 'DIA', 'BM', 'ALCAMPO', 'AHORRAMAS',
+    // Grandes cadenas
+    'MERCADONA', 'CARREFOUR', 'DIA', 'LIDL', 'ALDI', 'ALCAMPO', 'AHORRAMAS', 'EROSKI',
+    'BM', 'SUPERCOR', 'HIPERCOR', 'CONSUM', 'SIMPLY', 'MAKRO', 'COSTCO',
+    // Proximidad y franquicias habituales en Madrid
+    'CONDIS', 'COVIRAN', 'SPAR', 'SUMA', 'SUPERSOL', 'MASYMAS', 'PRIMAPRIX', 'TU SUPER', 'LUPA',
+    'GADIS', 'FROIZ', 'SANCHEZ ROMERO', 'MERCADO', 'FRUTERIA', 'CARNICERIA', 'PESCADERIA',
+    'HERBOLARIO', 'AMAZON FRESH',
   ],
   [CAT.comidaFuera]: [
-    '100 MONTADITOS', 'TELEPIZZA', 'BURGER KING', 'MCDONALDS', 'KEBAB', 'RESTAURANTE',
-    'CERVECERIA', 'BAR',
+    // Comida rápida y cadenas
+    '100 MONTADITOS', 'TELEPIZZA', 'DOMINOS', 'PIZZA HUT', 'PAPA JOHNS', 'BURGER KING', 'MCDONALDS',
+    'MC DONALDS', 'KFC', 'POPEYES', 'TACO BELL', 'FIVE GUYS', 'GOIKO', 'TGB', 'THE GOOD BURGER',
+    'VIPS', 'GINOS', 'FOSTERS HOLLYWOOD', 'TAGLIATELLA', 'RODILLA', 'PANS COMPANY', 'TIM HORTONS',
+    'STARBUCKS', 'COSTA COFFEE', 'DUNKIN', 'GRANIER', 'PANARIA', 'LA SUREÑA', 'LIZARRAN',
+    'UDON', 'SUSHI', 'WOK', 'KEBAB', 'DONER', 'NOODLES', 'POKE',
+    // Locales
+    'RESTAURANTE', 'CERVECERIA', 'BAR', 'TABERNA', 'CAFETERIA', 'PIZZERIA', 'HAMBURGUESERIA',
+    'MESON', 'ASADOR', 'BRASERIA', 'CHURRERIA', 'HELADERIA',
+    // A domicilio y comedores
+    'GLOVO', 'JUST EAT', 'UBER EATS', 'DELIVEROO', 'TOO GOOD TO GO', 'COMEDOR', 'CANTINA',
   ],
   [CAT.transporte]: [
-    'RENFE', 'CERCANIAS', 'METRO', 'EMT', 'INTERBUS', 'FGV', 'UBER', 'CABIFY', 'BOLT', 'MOVILIDAD',
+    // Transporte público de Madrid
+    'METRO', 'METRO DE MADRID', 'METRO LIGERO', 'EMT', 'CRTM', 'CONSORCIO TRANSPORTES',
+    'TARJETA TRANSPORTE', 'ABONO TRANSPORTE', 'RENFE', 'CERCANIAS', 'INTERBUS', 'ALSA', 'AVANZA',
+    'FGV', 'MOVILIDAD', 'BICIMAD',
+    // VTC, taxis y vehículos compartidos
+    'UBER', 'CABIFY', 'BOLT', 'FREENOW', 'FREE NOW', 'TAXI', 'LIME', 'DOTT', 'TIER', 'ZITY',
+    'SHARE NOW', 'WIBLE', 'GOTO', 'ACCIONA MOVILIDAD',
+    // Aparcamiento y peajes
+    'PARKING', 'APARCAMIENTO', 'EMPARK', 'SABA', 'TELPARK', 'EASYPARK', 'ELPARKING', 'PEAJE', 'VIA T',
   ],
-  [CAT.viajes]: ['RYANAIR', 'VUELING', 'IBERIA', 'OUIGO', 'IRYO', 'BOOKING', 'AIRBNB'],
-  [CAT.gasolina]: ['REPSOL', 'CEPSA', 'BP', 'GALP', 'PLENOIL', 'BALLENOIL'],
+  [CAT.viajes]: [
+    'RYANAIR', 'VUELING', 'IBERIA', 'IBERIA EXPRESS', 'AIR EUROPA', 'EASYJET', 'VOLOTEA',
+    'BINTER', 'OUIGO', 'IRYO', 'AVLO', 'FLIXBUS', 'BLABLACAR', 'TRAINLINE', 'BOOKING',
+    'AIRBNB', 'HOSTELWORLD', 'EXPEDIA', 'EDREAMS', 'LASTMINUTE', 'HOTEL', 'HOSTAL', 'AEROPUERTO',
+    'AENA',
+  ],
+  [CAT.gasolina]: [
+    'REPSOL', 'CEPSA', 'MOEVE', 'BP', 'GALP', 'SHELL', 'PLENOIL', 'BALLENOIL', 'PETRONOR',
+    'PETROPRIX', 'AVIA', 'DISA', 'GASOLINERA', 'ESTACION DE SERVICIO',
+  ],
   [CAT.suscripciones]: [
-    'SPOTIFY', 'NETFLIX', 'HBO', 'DISNEY', 'AMAZON PRIME', 'APPLE.COM/BILL', 'ANTHROPIC',
+    // Vídeo y música
+    'SPOTIFY', 'NETFLIX', 'HBO', 'HBO MAX', 'HBOMAX', 'DISNEY', 'AMAZON PRIME', 'PRIME VIDEO',
+    'APPLE.COM/BILL', 'YOUTUBE', 'YOUTUBE PREMIUM', 'DAZN', 'FILMIN',
+    'ATRESPLAYER', 'SKYSHOWTIME', 'CRUNCHYROLL', 'TWITCH', 'AUDIBLE', 'KINDLE UNLIMITED', 'DEEZER',
+    'TIDAL',
+    // Software, nube e IA
+    'GOOGLE ONE', 'GOOGLE PLAY', 'GOOGLE STORAGE', 'ICLOUD', 'MICROSOFT', 'OFFICE 365', 'ADOBE',
+    'CANVA', 'NOTION', 'DROPBOX', 'OPENAI', 'CHATGPT', 'ANTHROPIC', 'CLAUDE.AI', 'GITHUB',
+    'DUOLINGO', 'LINKEDIN', 'PATREON', 'PLAYSTATION PLUS', 'XBOX GAME PASS', 'NINTENDO ONLINE',
+  ],
+  [CAT.deporte]: [
+    // Gimnasios (cadenas frecuentes en Madrid)
+    'BASIC FIT', 'BASICFIT', 'ALTAFIT', 'VIVAGYM', 'VIVA GYM', 'MCFIT', 'GO FIT', 'GOFIT',
+    'ANYTIME FITNESS', 'DREAMFIT', 'SNAP FITNESS', 'SYNERGYM', 'FITNESS PARK', 'HOLMES PLACE',
+    'METROPOLITAN', 'SMARTFIT', 'GIMNASIO', 'GYM', 'CROSSFIT',
+    // Pistas, actividades y material
+    'PLAYTOMIC', 'PADEL', 'POLIDEPORTIVO', 'CENTRO DEPORTIVO', 'PISCINA', 'DECATHLON',
+    'SPRINTER', 'SPORT ZONE',
+  ],
+  [CAT.ropa]: [
+    'ZARA', 'PULL BEAR', 'BERSHKA', 'STRADIVARIUS', 'MASSIMO DUTTI', 'OYSHO', 'LEFTIES', 'MANGO',
+    'H M', 'PRIMARK', 'UNIQLO', 'SPRINGFIELD', 'CORTEFIEL', 'SFERA', 'KIABI', 'SHEIN', 'ZALANDO',
+    'VINTED', 'NIKE', 'ADIDAS', 'FOOT LOCKER', 'JD SPORTS', 'SNIPES', 'LEVIS', 'MISAKO', 'PARFOIS',
+  ],
+  [CAT.salud]: [
+    'FARMACIA', 'PARAFARMACIA', 'CLINICA', 'DENTAL', 'DENTISTA', 'HOSPITAL', 'FISIOTERAPIA',
+    'OPTICA', 'GENERAL OPTICA', 'MULTIOPTICAS', 'ALAIN AFFLELOU', 'SANITAS', 'ADESLAS', 'DKV',
+    'ASISA', 'PSICOLOGO', 'LABORATORIO',
+  ],
+  [CAT.hogar]: [
+    // Casa
+    'IKEA', 'LEROY MERLIN', 'BRICOMART', 'BAUHAUS', 'BRICO DEPOT', 'ACTION', 'FLYING TIGER',
+    'TIGER', 'MAISONS DU MONDE', 'ZARA HOME', 'H M HOME', 'CONFORAMA', 'MEDIA MARKT', 'MEDIAMARKT',
+    'PCCOMPONENTES', 'WORTEN', 'LAVANDERIA', 'TINTORERIA', 'FERRETERIA', 'DRUGSTORE', 'DRUNI',
+    'PRIMOR', 'SEPHORA', 'KIKO',
+    // Suministros y telefonía
+    'IBERDROLA', 'ENDESA', 'NATURGY', 'HOLALUZ', 'TOTALENERGIES', 'OCTOPUS ENERGY',
+    'CANAL DE ISABEL II', 'CANAL ISABEL II', 'MOVISTAR', 'VODAFONE', 'ORANGE', 'YOIGO', 'MASMOVIL',
+    'DIGI', 'LOWI', 'PEPEPHONE', 'SIMYO', 'JAZZTEL', 'FINETWORK',
+  ],
+  [CAT.educacion]: [
+    'UNIVERSIDAD', 'COMPLUTENSE', 'UCM', 'POLITECNICA', 'UPM', 'UAM', 'UC3M', 'CARLOS III',
+    'URJC', 'REY JUAN CARLOS', 'UNED', 'CEU', 'COMILLAS', 'NEBRIJA', 'MATRICULA', 'PAPELERIA',
+    'LIBRERIA', 'CASA DEL LIBRO', 'COPISTERIA', 'REPROGRAFIA', 'UDEMY', 'COURSERA', 'PLATZI',
+    'ACADEMIA',
+  ],
+  [CAT.ocio]: [
+    'CINE', 'CINES', 'CINESA', 'YELMO', 'KINEPOLIS', 'RENOIR', 'GOLEM', 'ODEON', 'TEATRO',
+    'TICKETMASTER', 'ENTRADAS', 'ATRAPALO', 'FEVER', 'DICE', 'EVENTBRITE', 'MUSEO', 'PARQUE WARNER',
+    'FAUNIA', 'ZOO', 'BOLERA', 'KARTING', 'ESCAPE ROOM', 'DISCOTECA', 'STEAM', 'PLAYSTATION',
+    'NINTENDO', 'XBOX', 'EPIC GAMES', 'GAME', 'FNAC',
   ],
 }
