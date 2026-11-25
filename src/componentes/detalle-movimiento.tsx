@@ -9,6 +9,54 @@ import {
 } from '../categorias/operaciones'
 import { contienePalabras, textoParaRegla } from '../categorias/clasificar'
 import { NOMBRE_TIPO, euros, eurosConSigno, fechaCorta } from '../utilidades/formato'
+import { desasignarMovimiento } from '../deudas/operaciones'
+import { AsignarPersona, AvatarPersona } from './personas'
+
+/** «Asignar a persona» desde la ficha de un Bizum o transferencia (§10.3). */
+function PersonaDelMovimiento({ id }: { id: string }) {
+  const app = useApp()
+  const [asignando, setAsignando] = useState(false)
+  const m = app.estado.movimientos.find((x) => x.id === id)!
+  const pago = app.estado.pagos.find((p) => p.movimientoId === id)
+  const persona = pago && app.estado.personas.find((p) => p.id === pago.personaId)
+
+  if (asignando) {
+    return (
+      <div class="campo">
+        <span>Asignar a persona</span>
+        <AsignarPersona movimiento={m} alTerminar={() => setAsignando(false)} />
+      </div>
+    )
+  }
+  return (
+    <div class="campo">
+      <span>Persona</span>
+      {persona ? (
+        <div class="persona-elegida">
+          <AvatarPersona nombre={persona.nombre} />
+          <span class="nombre">
+            {persona.nombre}
+            <span class="secundario"> · {m.importe > 0 ? 'me ha pagado' : 'le he pagado'}</span>
+          </span>
+          <button type="button" class="enlace" onClick={() => setAsignando(true)}>
+            Cambiar
+          </button>
+          <button
+            type="button"
+            class="enlace peligro"
+            onClick={() => void app.actualizar((e) => desasignarMovimiento(e, id))}
+          >
+            Quitar
+          </button>
+        </div>
+      ) : (
+        <button type="button" class="boton" onClick={() => setAsignando(true)}>
+          Asignar a persona
+        </button>
+      )}
+    </div>
+  )
+}
 
 interface Pregunta {
   categoriaId: string
@@ -148,7 +196,7 @@ export function DetalleMovimiento({ id, alCerrar }: { id: string; alCerrar: () =
           />
         </label>
 
-        <p class="secundario">«Asignar a persona» llega en la fase 6.</p>
+        {(m.tipo === 'bizum' || m.tipo === 'transferencia') && <PersonaDelMovimiento id={m.id} />}
       </section>
     </div>
   )

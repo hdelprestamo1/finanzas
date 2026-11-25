@@ -7,8 +7,45 @@ import {
   saldoActual,
 } from '../estadisticas/resumen'
 import { euros, eurosConSigno, fechaCorta, nombreMes } from '../utilidades/formato'
+import { personasConSaldo } from '../deudas/saldos'
+import { PreguntasEmparejado } from '../componentes/preguntas-emparejado'
+import { AvatarPersona } from '../componentes/personas'
+import { TextoSaldo } from './deudas'
 
 const TOP_CATEGORIAS = 5
+const MAX_PERSONAS_INICIO = 4
+
+/** Preguntas de emparejado y personas con saldo pendiente (§12.2). */
+function PendientesInicio() {
+  const { estado } = useApp()
+  const conSaldo = useMemo(() => personasConSaldo(estado), [estado])
+  return (
+    <>
+      <PreguntasEmparejado />
+      {conSaldo.length > 0 && (
+        <section class="tarjeta">
+          <h2>Deudas pendientes</h2>
+          <ul class="lista-personas">
+            {conSaldo.slice(0, MAX_PERSONAS_INICIO).map(({ persona, saldo }) => (
+              <li key={persona.id}>
+                <a class="fila-persona" href="#/deudas">
+                  <AvatarPersona nombre={persona.nombre} />
+                  <span class="nombre">{persona.nombre}</span>
+                  <TextoSaldo saldo={saldo} />
+                </a>
+              </li>
+            ))}
+          </ul>
+          {conSaldo.length > MAX_PERSONAS_INICIO && (
+            <a class="enlace-tarjeta" href="#/deudas">
+              Ver las {conSaldo.length}
+            </a>
+          )}
+        </section>
+      )}
+    </>
+  )
+}
 
 export function Inicio() {
   const { estado } = useApp()
@@ -118,10 +155,9 @@ export function Inicio() {
         </a>
       </section>
 
-      <p class="secundario nota-fases">
-        Las personas con saldo pendiente y las preguntas de emparejado de Bizum llegan en la fase 6;
-        el aviso de copia de seguridad, en la 7.
-      </p>
+      <PendientesInicio />
+
+      <p class="secundario nota-fases">El aviso de copia de seguridad llega en la fase 7.</p>
     </>
   )
 }

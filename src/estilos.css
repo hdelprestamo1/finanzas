@@ -333,6 +333,7 @@ a.boton {
 input[type='text'],
 input[type='password'],
 input[type='search'],
+input[type='date'],
 select,
 textarea {
   width: 100%;
@@ -1323,4 +1324,320 @@ ul.movimientos.tarjeta {
   display: inline-block;
   margin-right: 0.5rem;
   vertical-align: middle;
+}
+
+/* ---------------------------------------------------------------------
+   Personas y deudas
+   --------------------------------------------------------------------- */
+
+input[type='date'] {
+  min-height: 2.9rem;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+input[type='date']::-webkit-calendar-picker-indicator {
+  filter: invert(0.7);
+}
+
+.avatar-persona {
+  --color-avatar: var(--acento-claro);
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+}
+
+.avatar-mas {
+  --color-avatar: var(--texto-2);
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.cifras-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.boton-ancho {
+  width: 100%;
+}
+
+.boton-pequeno {
+  padding: 0.45rem 0.8rem;
+  font-size: 0.85rem;
+}
+
+.lista-personas {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.lista-personas li + li {
+  border-top: 1px solid var(--borde);
+}
+
+.fila-persona {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.fila-persona .nombre {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.fila-persona > span:last-child {
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Buscador de personas */
+.selector-persona .opciones {
+  list-style: none;
+  margin: 0.4rem 0 0;
+  padding: 0.25rem;
+  border-radius: var(--radio-control);
+  background: var(--superficie-2);
+  border: 1px solid var(--borde);
+}
+
+.selector-persona .opciones button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.45rem 0.5rem;
+  border: 0;
+  border-radius: 9px;
+  background: none;
+  color: var(--texto);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.selector-persona .opciones button:hover,
+.selector-persona .opciones button:focus-visible {
+  background: var(--superficie-3);
+  outline: none;
+}
+
+.selector-persona .opciones .avatar {
+  width: 2rem;
+  height: 2rem;
+  font-size: 0.75rem;
+}
+
+.selector-persona .opciones .crear {
+  color: var(--acento-claro);
+}
+
+.asignar-persona {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.asignar-persona p {
+  margin: 0;
+  color: var(--texto);
+}
+
+.asignar-persona > .enlace {
+  align-self: flex-start;
+  padding: 0;
+}
+
+.persona-elegida {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  color: var(--texto);
+}
+
+.persona-elegida .nombre {
+  flex: 1;
+  font-weight: 500;
+}
+
+.persona-elegida .enlace {
+  padding: 0.25rem;
+}
+
+/* Preguntas de emparejado */
+.pregunta-emparejado {
+  border-color: rgb(59 130 246 / 0.35);
+  background: linear-gradient(180deg, rgb(59 130 246 / 0.1), var(--superficie) 70%);
+}
+
+.contador {
+  font-size: 0.8rem;
+  color: var(--texto-2);
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  background: var(--superficie-3);
+}
+
+.pregunta-cuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.pregunta-cuerpo p {
+  margin: 0;
+}
+
+.pregunta-movimiento {
+  color: var(--texto-2);
+  font-size: 0.92rem;
+}
+
+.pregunta-movimiento em {
+  color: var(--texto);
+}
+
+.botones-pregunta {
+  justify-content: stretch;
+}
+
+.botones-pregunta .boton {
+  flex: 1;
+  padding-left: 0.6rem;
+  padding-right: 0.6rem;
+}
+
+.opciones-candidatos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.opciones-candidatos .boton {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-align: left;
+}
+
+/* Bizum sin asignar */
+.bizum-sin-asignar {
+  flex-direction: column;
+  align-items: stretch !important;
+  gap: 0.5rem !important;
+}
+
+.fila-bizum {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.bizum-sin-asignar .botones {
+  margin-top: 0;
+}
+
+/* Ficha de persona */
+.volver {
+  align-self: flex-start;
+  padding: 0.25rem 0;
+}
+
+.ficha-persona {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  text-align: center;
+  padding: 0.25rem 0 0.5rem;
+}
+
+.ficha-persona .avatar {
+  width: 4rem;
+  height: 4rem;
+  font-size: 1.3rem;
+}
+
+.nombre-persona {
+  border: 0;
+  background: none;
+  color: var(--texto);
+  font: inherit;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  cursor: pointer;
+  padding: 0;
+}
+
+.ficha-persona .fila-formulario {
+  width: 100%;
+}
+
+.saldo-persona {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 650;
+}
+
+.botones-ficha {
+  justify-content: stretch;
+}
+
+.botones-ficha .boton {
+  flex: 1;
+}
+
+.historial li {
+  gap: 0.5rem;
+}
+
+.historial .boton-icono {
+  width: 2rem;
+  height: 2rem;
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.segmentado-ancho {
+  display: flex;
+}
+
+.segmentado-ancho button {
+  flex: 1;
+  padding: 0.55rem;
+}
+
+.ayuda-pasos {
+  margin: 0 0 0.9rem;
+  padding-left: 1.2rem;
+  font-size: 0.88rem;
+  color: var(--texto-2);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.enlace-ayuda {
+  display: block;
+  padding: 0 0 0.8rem;
 }

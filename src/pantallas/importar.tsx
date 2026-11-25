@@ -8,6 +8,9 @@ import {
 } from '../importador'
 import { NOMBRE_TIPO, euros, eurosConSigno, fechaCorta } from '../utilidades/formato'
 import { categoriasPropuestas, importarExtracto } from '../categorias/operaciones'
+import { PreguntasEmparejado } from '../componentes/preguntas-emparejado'
+import { leerVcard } from '../personas/vcard'
+import { importarContactos } from '../personas/operaciones'
 
 type Paso =
   | { tipo: 'elegir' }
@@ -59,7 +62,12 @@ export function Importar() {
 
   switch (paso.tipo) {
     case 'elegir':
-      return <ElegirArchivo alElegir={alElegir} />
+      return (
+        <>
+          <ElegirArchivo alElegir={alElegir} />
+          <ImportarContactos />
+        </>
+      )
     case 'leyendo':
       return <p class="tarjeta vacia">Leyendo {paso.nombre}…</p>
     case 'guardando':
@@ -95,6 +103,8 @@ export function Importar() {
               </button>
             </div>
           </section>
+          {/* Paso 6 del flujo (§8.1): preguntas de emparejado de deudas. */}
+          <PreguntasEmparejado />
         </>
       )
     case 'previa':
@@ -220,5 +230,69 @@ function VistaPrevia(props: {
         </ul>
       </section>
     </>
+  )
+}
+
+/** Contactos desde un archivo .vcf (§10.1): solo nombre y teléfonos. */
+function ImportarContactos() {
+  const app = useApp()
+  const [resultado, setResultado] = useState<{ ok: boolean; texto: string } | null>(null)
+  const [ayuda, setAyuda] = useState(false)
+
+  return (
+    <section class="tarjeta">
+      <h2>Contactos</h2>
+      <p class="secundario">
+        Una app web no puede leer la agenda del iPhone: exporta tus contactos a un archivo{' '}
+        <code>.vcf</code> y elígelo aquí. Solo se guardan el nombre y los teléfonos (cifrados).
+        Reimportar no crea duplicados.
+      </p>
+      {ayuda ? (
+        <ol class="ayuda-pasos">
+          <li>
+            <strong>En el iPhone:</strong> app Contactos → «Listas» (arriba a la izquierda) → mantén
+            pulsada la lista → <em>Exportar</em> → guárdalo en Archivos.
+          </li>
+          <li>
+            <strong>Desde el ordenador:</strong> icloud.com → Contactos → selecciona los contactos →
+            menú de acciones → <em>Exportar vCard</em>.
+          </li>
+        </ol>
+      ) : (
+        <button type="button" class="enlace enlace-ayuda" onClick={() => setAyuda(true)}>
+          ¿Cómo exporto mis contactos?
+        </button>
+      )}
+      {resultado && <p class={resultado.ok ? 'exito' : 'error'}>{resultado.texto}</p>}
+      <label class="boton selector-archivo">
+        Elegir archivo .vcf
+        <input
+          type="file"
+          accept=".vcf,text/vcard,text/x-vcard"
+          onChange={async (e) => {
+            const archivo = e.currentTarget.files?.[0]
+            e.currentTarget.value = ''
+            if (!archivo) return
+            const contactos = leerVcard(await archivo.text())
+            if (contactos.length === 0) {
+              setResultado({ ok: false, texto: 'No se ha encontrado ningún contacto en ese archivo.' })
+              return
+            }
+            let nuevos = 0
+            let actualizados = 0
+            await app.actualizar((est) => {
+              const r = importarContactos(est, contactos)
+              nuevos = r.nuevos
+              actualizados = r.actualizados
+              return r.estado
+            })
+            setResultado({
+              ok: true,
+              texto: `${contactos.length} contactos leídos: ${nuevos} nuevos, ${actualizados} con teléfonos añadidos.`,
+            })
+          }}
+        />
+      </label>
+    </section>
   )
 }

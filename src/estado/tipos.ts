@@ -105,6 +105,11 @@ export interface EstadoApp {
   importaciones: Importacion[]
   /** Fecha ISO de la última copia de seguridad exportada. */
   ultimaCopia?: string
+  /**
+   * Movimientos por los que el emparejado ya no debe preguntar (respuesta «No»
+   * o descartados de «Bizum enviados sin asignar»). Opcional: no existía antes de la fase 6.
+   */
+  descartados?: string[]
 }
 
 export const MINUTOS_BLOQUEO_POR_DEFECTO = 5
