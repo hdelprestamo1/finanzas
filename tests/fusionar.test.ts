@@ -89,7 +89,7 @@ describe('continuidad de saldo (§8.4)', () => {
   it('avisa si falta un periodo intermedio', () => {
     const primera = importar(subExtracto([0, 1, 2]), []) // hasta el 02/03
     const p = preverImportacion(subExtracto([20, 21, 22]), primera.movimientos) // desde el 08/03
-    expect(p.avisoContinuidad).toMatch(/no coincide/)
+    expect(p.avisoContinuidad).toMatch(/no encaja/)
   })
 })
 

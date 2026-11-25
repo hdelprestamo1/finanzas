@@ -5,6 +5,7 @@ import { categoriaBasica } from '../categorias/porDefecto'
 import { normalizar } from '../utilidades/texto'
 import { euros, fechaCorta } from '../utilidades/formato'
 import type { ExtractoLeido, MovimientoLeido } from './kutxabank'
+import { ordenarPorCadena, roturas } from './orden'
 
 type ConClave = Pick<Movimiento, 'fecha' | 'fechaValor' | 'importe' | 'saldo' | 'concepto'>
 
@@ -25,7 +26,7 @@ export interface PrevisionImportacion {
   filas: FilaPrevia[]
   nuevos: number
   duplicados: number
-  /** Aviso si el saldo inicial no encaja con lo ya importado (puede faltar un periodo). */
+  /** Aviso si algún movimiento nuevo no encaja con lo ya importado (puede faltar algo). */
   avisoContinuidad: string | null
 }
 
@@ -52,30 +53,38 @@ export function preverImportacion(
   })
 
   const nuevos = filas.filter((f) => !f.duplicado).length
-  return {
+  const prevision: PrevisionImportacion = {
     extracto,
     filas,
     nuevos,
     duplicados: filas.length - nuevos,
-    avisoContinuidad: comprobarContinuidad(extracto, existentes),
+    avisoContinuidad: null,
   }
+  prevision.avisoContinuidad = comprobarContinuidad(prevision, existentes)
+  return prevision
 }
 
-function comprobarContinuidad(extracto: ExtractoLeido, existentes: readonly Movimiento[]): string | null {
-  // Último movimiento ya guardado anterior al inicio del extracto (la lista está en orden cronológico).
-  let anterior: Movimiento | undefined
-  for (const m of existentes) if (m.fecha < extracto.periodoDesde) anterior = m
-  if (!anterior || anterior.saldo === extracto.saldoInicial) return null
-  return `El saldo inicial de este extracto (${euros(extracto.saldoInicial)}) no coincide con el saldo tras el último movimiento ya importado antes del ${fechaCorta(extracto.periodoDesde)} (${euros(anterior.saldo)}). Puede faltar algún periodo intermedio.`
+/**
+ * Continuidad de saldo (§8.4): se simula la fusión y se mira si algún movimiento NUEVO
+ * no encaja con el que queda antes o después (saldo anterior + importe ≠ saldo).
+ * Si no hay movimientos nuevos, no hay nada que avisar.
+ */
+function comprobarContinuidad(prevision: PrevisionImportacion, existentes: readonly Movimiento[]): string | null {
+  if (prevision.nuevos === 0 || existentes.length === 0) return null
+  const nuevos = crearMovimientos(prevision, '')
+  const idsNuevos = new Set(nuevos.map((m) => m.id))
+  const lista = ordenarPorCadena([...existentes, ...nuevos])
+  const rota = roturas(lista).find((i) => idsNuevos.has(lista[i]!.id) || idsNuevos.has(lista[i - 1]!.id))
+  if (rota === undefined) return null
+  const antes = lista[rota - 1]!
+  const despues = lista[rota]!
+  const esperado = despues.saldo - despues.importe
+  return `El saldo no encaja entre el ${fechaCorta(antes.fecha)} y el ${fechaCorta(despues.fecha)}: tras el primero el saldo es ${euros(antes.saldo)}, pero el siguiente parte de ${euros(esperado)} (diferencia ${euros(esperado - antes.saldo)}). Puede faltar algún movimiento intermedio.`
 }
 
-/** Aplica la importación: devuelve la lista completa de movimientos y el registro de importación. */
-export function aplicarImportacion(
-  prevision: PrevisionImportacion,
-  existentes: readonly Movimiento[],
-  datos: { importacionId: string; nombreArchivo: string; fecha: string },
-): { movimientos: Movimiento[]; importacion: Importacion } {
-  const nuevos: Movimiento[] = prevision.filas
+/** Movimientos que se darían de alta (los no duplicados), con su categoría provisional. */
+function crearMovimientos(prevision: PrevisionImportacion, importacionId: string): Movimiento[] {
+  return prevision.filas
     .filter((f) => !f.duplicado)
     .map(({ leido, id }) => {
       const m: Movimiento = {
@@ -88,19 +97,23 @@ export function aplicarImportacion(
         tipo: leido.tipo,
         categoriaId: categoriaBasica(leido.tipo, leido.importe),
         categoriaManual: false,
-        importacionId: datos.importacionId,
+        importacionId,
       }
       if (leido.comercio !== undefined) m.comercio = leido.comercio
       if (leido.textoLibre !== undefined) m.textoLibre = leido.textoLibre
       if (leido.nombreEnConcepto !== undefined) m.nombreEnConcepto = leido.nombreEnConcepto
       return m
     })
+}
 
-  // Orden cronológico estable: a igual fecha, primero lo que ya había y luego el orden del archivo.
-  const movimientos = [...existentes, ...nuevos]
-    .map((m, i) => ({ m, i }))
-    .sort((a, b) => (a.m.fecha < b.m.fecha ? -1 : a.m.fecha > b.m.fecha ? 1 : a.i - b.i))
-    .map(({ m }) => m)
+/** Aplica la importación: devuelve la lista completa de movimientos y el registro de importación. */
+export function aplicarImportacion(
+  prevision: PrevisionImportacion,
+  existentes: readonly Movimiento[],
+  datos: { importacionId: string; nombreArchivo: string; fecha: string },
+): { movimientos: Movimiento[]; importacion: Importacion } {
+  // Orden por fecha y, dentro de cada día, por la cadena de saldos (el orden real del banco).
+  const movimientos = ordenarPorCadena([...existentes, ...crearMovimientos(prevision, datos.importacionId)])
 
   const { extracto } = prevision
   return {
